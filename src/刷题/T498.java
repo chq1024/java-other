@@ -12,6 +12,7 @@ public class T498 {
         for (int i = 1; i <= max; i++) {
 
         }
+        return null;
     }
 
     public static void main(String[] args) {
