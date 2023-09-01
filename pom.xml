@@ -6,7 +6,6 @@
     <artifactId>leetcode</artifactId>
     <packaging>pom</packaging>
     <version>1.0</version>
-
     <name>leetcode</name>
     <properties>
         <java.version>11</java.version>
@@ -19,8 +18,5 @@
             <version>3.3.0</version>
         </dependency>
     </dependencies>
-
-    <build>
-    </build>
 
 </project>
