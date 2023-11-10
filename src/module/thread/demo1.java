@@ -29,10 +29,5 @@ public class demo1 {
 //
 //        }
 //        executorService.shutdown();
-        String jdbcUrl = "jdbc:mysql://localhost:3306/vesta_log_10001?useSSL=false&useUnicode=true&characterEncoding=utf-8&serverTimezone=GMT%2B8";
-        String[] split = jdbcUrl.split("/");
-        String s = split[split.length - 1];
-        String s1 = s.split("\\?")[0];
-        System.out.println(s1);
     }
 }
