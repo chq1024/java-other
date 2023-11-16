@@ -1,7 +1,5 @@
 package data_struct;
 
-import com.sun.source.tree.Tree;
-
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
@@ -82,6 +80,48 @@ public class TreeSearchDemo {
             pre.left = node;
         } else {
             pre.right = node;
+        }
+    }
+
+    public void remove(TreeNode root,int value) {
+        if (root == null) {
+            return;
+        }
+        TreeNode curr = root,pre = null;
+        while (curr != null) {
+            if (curr.val == value) {
+                break;
+            }
+            pre = curr;
+            if (curr.val < value) {
+                curr = curr.right;
+            } else {
+                curr = curr.left;
+            }
+        }
+        if (curr == null) {
+            return;
+        }
+        if (curr.left == null || curr.right == null) {
+            TreeNode child = curr.left != null ? curr.left:curr.right;
+            if (curr != root) {
+                if (pre.left == curr) {
+                    pre.left = child;
+                } else {
+                    pre.right = child;
+                }
+            } else {
+                root = child;
+            }
+        } else {
+            TreeNode temp = curr.right;
+            while (temp.left != null) {
+                temp = temp.left;
+            }
+            // 递归删除节点 tmp
+            remove(root,temp.val);
+            // 用 tmp 覆盖 cur
+            curr.val = temp.val;
         }
     }
 
