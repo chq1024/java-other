@@ -1,2 +1,2 @@
-# leetcode
-leetcode刷题
+# java-other
+一些练笔
