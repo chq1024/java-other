@@ -1,54 +1,91 @@
 package netty.server;
 
-import io.netty.buffer.ByteBuf;
-import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
-import io.netty.channel.ChannelInboundHandlerAdapter;
-import io.netty.channel.ChannelPipeline;
-import io.netty.util.CharsetUtil;
+import io.netty.channel.SimpleChannelInboundHandler;
+import io.netty.channel.group.ChannelGroup;
+import io.netty.channel.group.DefaultChannelGroup;
+import io.netty.handler.timeout.IdleStateEvent;
+import io.netty.util.concurrent.GlobalEventExecutor;
+
+import java.text.SimpleDateFormat;
 
 /**
  * @author bk
  */
-public class NettyServerChannelHandler extends ChannelInboundHandlerAdapter {
+public class NettyServerChannelHandler extends SimpleChannelInboundHandler<String> {
+
+    private static final ChannelGroup channelGroup = new DefaultChannelGroup(GlobalEventExecutor.INSTANCE);
+    SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
     @Override
     public void channelActive(ChannelHandlerContext ctx) throws Exception {
-        System.out.println("服务端激活");
+        System.out.println(ctx.channel().remoteAddress() + "上线了~");
         ctx.fireChannelActive();
-        ctx.writeAndFlush(Unpooled.copiedBuffer("hello, server: (>^ω^<)喵", CharsetUtil.UTF_8));
     }
 
     @Override
-    public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
-        System.out.println("服务器读取线程 " + Thread.currentThread().getName() + " 看看channel =" + ctx.channel());
-        System.out.println("server ctx =" + ctx);
-        System.out.println("看看channel 和 pipeline的关系");
+    public void channelInactive(ChannelHandlerContext ctx) throws Exception {
+        System.out.println(ctx.channel().remoteAddress() + " 离线了~");
+        ctx.fireChannelInactive();
+    }
+
+    @Override
+    public void handlerAdded(ChannelHandlerContext ctx) throws Exception {
         Channel channel = ctx.channel();
-        ChannelPipeline pipeline = ctx.pipeline(); //本质是一个双向链接, 出站入站
-
-        //将 msg 转成一个 ByteBuf
-        //ByteBuf 是 Netty 提供的，不是 NIO 的 ByteBuffer.
-        ByteBuf buf = (ByteBuf) msg;
-        System.out.println("客户端发送消息是:" + buf.toString(CharsetUtil.UTF_8));
-        System.out.println("客户端地址:" + channel.remoteAddress());
+        // 广播消息
+        channelGroup.writeAndFlush("[客户端]" + channel.remoteAddress() + " 加入聊天" + sdf.format(new java.util.Date()) + " \n");
+        channelGroup.add(channel);
     }
 
-    //数据读取完毕
     @Override
-    public void channelReadComplete(ChannelHandlerContext ctx) throws Exception {
-        //writeAndFlush 是 write + flush
-        //将数据写入到缓存，并刷新
-        //一般讲，我们对这个发送的数据进行编码
-        ctx.writeAndFlush(Unpooled.copiedBuffer("hello, 客户端~(>^ω^<)喵1", CharsetUtil.UTF_8));
+    public void handlerRemoved(ChannelHandlerContext ctx) throws Exception {
+        Channel channel = ctx.channel();
+        channelGroup.writeAndFlush("[客户端]" + channel.remoteAddress() + " 离开了\n");
+        System.out.println("channelGroup size" + channelGroup.size());
     }
 
+
+    @Override
+    protected void channelRead0(ChannelHandlerContext ctx, String msg) throws Exception {
+        Channel channel = ctx.channel();
+        channelGroup.forEach(ch -> {
+            if (channel != ch) { //不是当前的channel,转发消息
+                ch.writeAndFlush("[客户]" + channel.remoteAddress() + " 发送了消息" + msg + "\n");
+            } else {//回显自己发送的消息给自己
+                ch.writeAndFlush("[自己]发送了消息" + msg + "\n");
+            }
+        });
+    }
 
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause)
             throws Exception {
         System.out.println("异常信息：" + cause.getMessage());
-        ctx.fireExceptionCaught(cause);
+    }
+
+    @Override
+    public void userEventTriggered(ChannelHandlerContext ctx, Object evt) throws Exception {
+        if (evt instanceof IdleStateEvent) {
+            //将evt 向下转型 IdleStateEvent
+            IdleStateEvent event = (IdleStateEvent) evt;
+            String eventType = null;
+            switch (event.state()) {
+                case READER_IDLE:
+                    eventType = "读空闲";
+                    break;
+                case WRITER_IDLE:
+                    eventType = "写空闲";
+                    break;
+                case ALL_IDLE:
+                    eventType = "读写空闲";
+                    break;
+                default:
+            }
+            System.out.println(ctx.channel().remoteAddress() + "--超时时间--" + eventType);
+            System.out.println("服务器做相应处理..");
+            //如果发生空闲，我们关闭通道
+            ctx.channel().close();
+        }
     }
 }

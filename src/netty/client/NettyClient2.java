@@ -16,7 +16,7 @@ import java.util.Scanner;
 /**
  * @author bk
  */
-public class NettyClient {
+public class NettyClient2 {
 
     public static void main(String[] args) {
         NioEventLoopGroup group = new NioEventLoopGroup();
