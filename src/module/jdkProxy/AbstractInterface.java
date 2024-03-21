@@ -7,5 +7,5 @@ import java.lang.reflect.InvocationHandler;
  */
 public interface AbstractInterface {
 
-    void sayMessage(String msg, InvocationHandler invocationHandler);
+    void sayMessage(String msg);
 }

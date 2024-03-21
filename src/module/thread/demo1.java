@@ -1,33 +1,42 @@
 package module.thread;
 
+import java.util.concurrent.TimeUnit;
+
 /**
+ * 守护线程要在所有线程处理完任务后
  * @author bk
  */
 public class demo1 {
 
     public static void main(String[] args) {
-//        Semaphore semaphore = new Semaphore(3);
-//        ExecutorService executorService = Executors.newFixedThreadPool(3);
-//
-//        for (int i = 0; i < 20; i++) {
-//            try {
-//                semaphore.acquire();
-//                executorService.submit(()->{
-//                    String threadName = Thread.currentThread().getName();
-//                    try {
-//                        Thread.sleep(1000);
-//                        System.out.println("currenThread:" + threadName + " less:" + semaphore.availablePermits());
-//                    } catch (InterruptedException e) {
-//                        throw new RuntimeException(e);
-//                    } finally {
-//                        semaphore.release();
-//                    }
-//                });
-//            } catch (InterruptedException e) {
-//                throw new RuntimeException(e);
-//            }
-//
-//        }
-//        executorService.shutdown();
+        Thread thread = new Thread(() -> {
+            String threadType = Thread.currentThread().isDaemon() ? "daemon" : "user";
+            System.out.println(Thread.currentThread().getName() + ":" + threadType);
+            while (true) {
+
+            }
+        });
+        thread.setName("myThread");
+        thread.setDaemon(true);
+        thread.start();
+
+        Thread thread1 = new Thread(() -> {
+            String name = Thread.currentThread().getName();
+            System.out.println(name);
+            try {
+                Thread.sleep(6000);
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+        });
+        thread1.start();
+
+        try {
+            TimeUnit.SECONDS.sleep(3);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+
+        System.out.println(Thread.currentThread().getName() + " -----end");
     }
 }

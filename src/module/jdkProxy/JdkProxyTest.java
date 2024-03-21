@@ -3,9 +3,9 @@ package module.jdkProxy;
 import java.lang.reflect.Proxy;
 
 /**
- * @author bk
+ * @author bk`
  */
-public class Test {
+public class JdkProxyTest {
 
 
     public static void main(String[] args) {
@@ -14,7 +14,7 @@ public class Test {
         module.jdkProxy.AbstractInterface proxyInstance = (module.jdkProxy.AbstractInterface) Proxy.newProxyInstance(
                 module.jdkProxy.InterfaceImpl.class.getClassLoader(), module.jdkProxy.InterfaceImpl.class.getInterfaces(),
                 demoHandler);
-        proxyInstance.sayMessage("hello world", demoHandler);
+        proxyInstance.sayMessage("hello world");
     }
 
 }

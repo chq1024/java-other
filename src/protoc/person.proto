@@ -1,0 +1,11 @@
+syntax= "proto3";
+
+package protoc_java;
+option java_package = "protoc_java";
+option java_outer_classname = "Person";
+
+message PersonProtoc {
+   string name = 1;
+   int32 age = 2;
+   map<string,string> mapTc = 3;
+}
